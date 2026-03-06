@@ -20,6 +20,7 @@ function AgentClient({ appConfig }: EmbedFixedAgentClientProps) {
   const isAnimating = useRef(false);
   const room = useMemo(() => new Room(), []);
   const [popupOpen, setPopupOpen] = useState(false);
+  const [micGranted, setMicGranted] = useState(false);
   const [error, setError] = useState<EmbedErrorDetails | null>(null);
   const { connectionDetails, refreshConnectionDetails, existingOrRefreshConnectionDetails } =
     useConnectionDetails(appConfig);
@@ -31,6 +32,7 @@ function AgentClient({ appConfig }: EmbedFixedAgentClientProps) {
     }
 
     setError(null);
+    setMicGranted(false);
     setPopupOpen((open) => !open);
   };
 
@@ -84,6 +86,7 @@ function AgentClient({ appConfig }: EmbedFixedAgentClientProps) {
         // First, request microphone permission (but don't publish yet)
         // This shows the permission prompt to the user on mobile
         await navigator.mediaDevices.getUserMedia({ audio: true });
+        setMicGranted(true);
 
         // After permission granted, connect to the room
         const connectionDetails = await existingOrRefreshConnectionDetails();
@@ -158,6 +161,7 @@ function AgentClient({ appConfig }: EmbedFixedAgentClientProps) {
                 }}
                 disabled={!popupOpen}
                 sessionStarted={popupOpen}
+                micGranted={micGranted}
                 onEmbedError={setError}
                 className="absolute inset-0"
               />

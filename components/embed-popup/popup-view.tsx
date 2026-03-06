@@ -48,6 +48,7 @@ type PopupProps = {
   appConfig: AppConfig;
   disabled: boolean;
   sessionStarted: boolean;
+  micGranted: boolean;
   onEmbedError: React.Dispatch<React.SetStateAction<EmbedErrorDetails | null>>;
 };
 
@@ -55,6 +56,7 @@ export const PopupView = ({
   appConfig,
   disabled,
   sessionStarted,
+  micGranted,
   onEmbedError,
   ref,
 }: React.ComponentProps<'div'> & PopupProps) => {
@@ -82,7 +84,7 @@ export const PopupView = ({
     if (!sessionStarted) setAgentHasSpoken(false);
   }, [sessionStarted]);
 
-  const showRinging = sessionStarted && !agentHasSpoken;
+  const showRinging = sessionStarted && micGranted && !agentHasSpoken;
   const cleanBaseUrl = appConfig.sandboxId?.replace(/^https?:\/\//, '');
   const avatarSrc = cleanBaseUrl ? `https://${cleanBaseUrl}.vercel.app/lk-logo.svg` : '/lk-logo.svg';
 
