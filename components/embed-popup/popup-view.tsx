@@ -14,6 +14,7 @@ import {
 } from '@livekit/components-react';
 import { ActionBar } from '@/components/embed-popup/action-bar';
 import { AudioVisualizer } from '@/components/embed-popup/audio-visualizer';
+import { RingingView } from '@/components/embed-popup/ringing-view';
 import { Transcript } from '@/components/embed-popup/transcript';
 import useChatAndTranscription from '@/hooks/use-chat-and-transcription';
 import { useDebugMode } from '@/hooks/useDebug';
@@ -69,7 +70,21 @@ export const PopupView = ({
   const [screenShareTrack] = useTracks([Track.Source.ScreenShare]);
   const cameraTrack: TrackReference | undefined = useLocalTrackRef(Track.Source.Camera);
   const [chatOpen, setChatOpen] = useState(false);
+  const [agentHasSpoken, setAgentHasSpoken] = useState(false);
   const { messages, send } = useChatAndTranscription();
+
+  // Show ringing screen until agent first speaks
+  useEffect(() => {
+    if (agentState === 'speaking') setAgentHasSpoken(true);
+  }, [agentState]);
+
+  useEffect(() => {
+    if (!sessionStarted) setAgentHasSpoken(false);
+  }, [sessionStarted]);
+
+  const showRinging = sessionStarted && !agentHasSpoken;
+  const cleanBaseUrl = appConfig.sandboxId?.replace(/^https?:\/\//, '');
+  const avatarSrc = cleanBaseUrl ? `https://${cleanBaseUrl}.vercel.app/lk-logo.svg` : '/lk-logo.svg';
 
   const { supportsChatInput, supportsVideoInput, supportsScreenShare } = appConfig;
   const capabilities = {
@@ -110,6 +125,10 @@ export const PopupView = ({
   return (
     <div ref={ref} inert={disabled} className="flex h-full w-full flex-col overflow-hidden">
       <div className="relative flex h-full shrink-1 grow-1 flex-col">
+        {/* Ringing screen — shown until agent first speaks */}
+        <AnimatePresence>
+          {showRinging && <RingingView key="ringing" avatarSrc={avatarSrc} agentName="Hotel Receptionist" />}
+        </AnimatePresence>
         {/* Transcript - Only visible when chat is toggled */}
         <TranscriptMotion
           initial={{

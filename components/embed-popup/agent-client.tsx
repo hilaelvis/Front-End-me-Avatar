@@ -142,7 +142,7 @@ function AgentClient({ appConfig }: EmbedFixedAgentClientProps) {
         }}
         onAnimationStart={handlePanelAnimationStart}
         onAnimationComplete={handlePanelAnimationComplete}
-        className="fixed right-4 bottom-20 left-4 z-50 md:left-auto"
+        className="fixed right-4 bottom-28 left-4 z-50 md:left-auto"
       >
         <div className="bg-bg1 dark:bg-bg2 border-separator1 dark:border-separator2 ml-auto h-[480px] w-full rounded-[28px] border border-solid drop-shadow-md md:w-[360px]">
           <div className="relative h-full w-full">
