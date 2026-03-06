@@ -84,23 +84,23 @@ export function Trigger({ error = null, popupOpen, onToggle, baseUrl }: TriggerP
             (isAgentConnected || (error && popupOpen)) && 'bg-destructive'
           )}
         >
+          {/* Logo - outside AnimatePresence for instant unmount in shadow DOM */}
+          {!popupOpen && (
+            <motion.div
+              key="lk-logo"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="absolute inset-0"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`${logoSrc}?v=18`}
+                alt="Logo"
+                className="h-full w-full object-cover object-top"
+              />
+            </motion.div>
+          )}
           <AnimatePresence>
-            {!popupOpen && (
-              <motion.div
-                key="lk-logo"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: popupOpen ? 20 : -20 }}
-                className="absolute inset-0"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={`${logoSrc}?v=17`}
-                  alt="Logo"
-                  className="h-full w-full object-cover object-top"
-                />
-              </motion.div>
-            )}
             {(isAgentConnecting || (error && popupOpen)) && (
               <motion.div
                 key="dismiss"
