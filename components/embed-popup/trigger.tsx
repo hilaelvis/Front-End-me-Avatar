@@ -18,7 +18,11 @@ export function Trigger({ error = null, popupOpen, onToggle, baseUrl }: TriggerP
   // Use baseUrl for embedded widgets, relative path for direct access
   // Strip https:// if present in baseUrl
   const cleanBaseUrl = baseUrl?.replace(/^https?:\/\//, '');
-  const logoSrc = cleanBaseUrl ? `https://${cleanBaseUrl}.vercel.app/lk-logo.svg` : '/lk-logo.svg';
+  const logoSrc = !cleanBaseUrl
+    ? '/lk-logo.svg'
+    : cleanBaseUrl.includes(':') // localhost:port style URL
+    ? `http://${cleanBaseUrl}/lk-logo.svg`
+    : `https://${cleanBaseUrl}.vercel.app/lk-logo.svg`;
   const { state: agentState } = useVoiceAssistant();
 
   const isAgentConnecting =
@@ -85,17 +89,15 @@ export function Trigger({ error = null, popupOpen, onToggle, baseUrl }: TriggerP
             (isAgentConnected || (error && popupOpen)) && 'bg-destructive'
           )}
         >
-          {/* Logo - plain div, no Framer Motion, guaranteed instant unmount in shadow DOM / React apps */}
-          {!popupOpen && (
-            <div className="absolute inset-0">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={`${logoSrc}?v=19`}
-                alt="Logo"
-                className="h-full w-full object-cover object-top"
-              />
-            </div>
-          )}
+          {/* Logo - CSS hidden when popup open (more reliable than unmounting in shadow DOM) */}
+          <div className="absolute inset-0" style={popupOpen ? { display: 'none' } : {}}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`${logoSrc}?v=20`}
+              alt=""
+              className="h-full w-full object-cover object-top"
+            />
+          </div>
           <AnimatePresence>
             {(isAgentConnecting || (error && popupOpen)) && (
               <motion.div
