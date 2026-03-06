@@ -81,24 +81,20 @@ export function Trigger({ error = null, popupOpen, onToggle, baseUrl }: TriggerP
             'relative z-20 grid place-items-center rounded-full overflow-hidden transition-all duration-300',
             'ring-0 ring-white group-hover:ring-[1.5px] group-focus:ring-[1.5px]',
             popupOpen ? 'size-[67px]' : 'size-20',
+            popupOpen && 'bg-gray-900',
             (isAgentConnected || (error && popupOpen)) && 'bg-destructive'
           )}
         >
-          {/* Logo - outside AnimatePresence for instant unmount in shadow DOM */}
+          {/* Logo - plain div, no Framer Motion, guaranteed instant unmount in shadow DOM / React apps */}
           {!popupOpen && (
-            <motion.div
-              key="lk-logo"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="absolute inset-0"
-            >
+            <div className="absolute inset-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={`${logoSrc}?v=18`}
+                src={`${logoSrc}?v=19`}
                 alt="Logo"
                 className="h-full w-full object-cover object-top"
               />
-            </motion.div>
+            </div>
           )}
           <AnimatePresence>
             {(isAgentConnecting || (error && popupOpen)) && (
