@@ -13,7 +13,7 @@ interface RingingViewProps {
 
 export function RingingView({
   avatarSrc,
-  agentName = 'Hotel Receptionist',
+  agentName = 'AI Receptionist',
   isRinging,
   agentState,
 }: RingingViewProps) {
