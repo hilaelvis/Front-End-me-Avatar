@@ -2,27 +2,41 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
+import type { AgentState, TrackReference } from '@livekit/components-react';
+import { AudioVisualizer } from '@/components/embed-popup/audio-visualizer';
 
 interface RingingViewProps {
   avatarSrc: string;
   agentName?: string;
+  isRinging: boolean;
+  agentState?: AgentState;
+  audioTrack?: TrackReference;
 }
 
-export function RingingView({ avatarSrc, agentName = 'Agent' }: RingingViewProps) {
+export function RingingView({
+  avatarSrc,
+  agentName = 'Hotel Receptionist',
+  isRinging,
+  agentState,
+  audioTrack,
+}: RingingViewProps) {
   const [dotCount, setDotCount] = useState(0);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const ringIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Animate "Calling..." dots (0–3 dots cycling every 500ms)
+  // Animate "Calling..." dots — only while ringing
   useEffect(() => {
+    if (!isRinging) return;
     const interval = setInterval(() => {
       setDotCount((prev) => (prev >= 3 ? 0 : prev + 1));
     }, 500);
     return () => clearInterval(interval);
-  }, []);
+  }, [isRinging]);
 
-  // Synthetic phone ringtone via Web Audio API — no external file needed
+  // Phone ringtone via Web Audio API — only while ringing
   useEffect(() => {
+    if (!isRinging) return;
+
     const playRing = () => {
       try {
         if (!audioCtxRef.current) {
@@ -74,7 +88,7 @@ export function RingingView({ avatarSrc, agentName = 'Agent' }: RingingViewProps
       audioCtxRef.current?.close();
       audioCtxRef.current = null;
     };
-  }, []);
+  }, [isRinging]);
 
   const dots = '.'.repeat(dotCount);
 
@@ -84,40 +98,66 @@ export function RingingView({ avatarSrc, agentName = 'Agent' }: RingingViewProps
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
-      className="absolute inset-0 z-10 flex flex-col items-center justify-between overflow-hidden rounded-[28px]"
+      className="absolute inset-0 z-10 flex flex-col items-center overflow-hidden rounded-[28px]"
       style={{
         background: 'linear-gradient(180deg, #1a1f3c 0%, #0f1220 50%, #0a0d1a 100%)',
       }}
     >
-      {/* "Calling..." text */}
-      <div className="mt-12 text-center">
-        <p className="text-base font-light tracking-[0.25em] text-white/80 uppercase">
-          Calling{dots}
-        </p>
-      </div>
+      {isRinging ? (
+        /* ── RINGING STATE ── */
+        <>
+          {/* "Calling..." header */}
+          <div className="mt-12 text-center">
+            <p className="text-base font-light tracking-[0.25em] text-white/80 uppercase">
+              Calling{dots}
+            </p>
+          </div>
 
-      {/* Avatar with 3 expanding pulse rings */}
-      <div className="relative flex items-center justify-center">
-        {[0, 1, 2].map((i) => (
-          <motion.div
-            key={i}
-            className="absolute rounded-full border border-white/20"
-            animate={{ scale: [1, 1.8], opacity: [0.4, 0] }}
-            transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.7, ease: 'easeOut' }}
-            style={{ width: 108, height: 108 }}
-          />
-        ))}
-        <div className="relative z-10 h-36 w-36 overflow-hidden rounded-full border-2 border-white/30 shadow-2xl">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={avatarSrc} alt="Agent" className="h-full w-full object-cover object-top" />
+          {/* Avatar with pulsing rings */}
+          <div className="flex flex-1 flex-col items-center justify-center">
+            <div className="relative flex items-center justify-center">
+              {[0, 1, 2].map((i) => (
+                <motion.div
+                  key={i}
+                  className="absolute rounded-full border border-white/20"
+                  animate={{ scale: [1, 1.8], opacity: [0.4, 0] }}
+                  transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.7, ease: 'easeOut' }}
+                  style={{ width: 108, height: 108 }}
+                />
+              ))}
+              <div className="relative z-10 h-36 w-36 overflow-hidden rounded-full border-2 border-white/30 shadow-2xl">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={avatarSrc} alt="Agent" className="h-full w-full object-cover object-top" />
+              </div>
+            </div>
+
+            {/* Name + "Ringing..." */}
+            <div className="mt-8 text-center">
+              <h2 className="text-xl font-semibold text-white">{agentName}</h2>
+              <p className="mt-1 text-sm text-white/50">Ringing...</p>
+            </div>
+          </div>
+        </>
+      ) : (
+        /* ── ACTIVE CALL STATE (agent speaking, no video) ── */
+        <div className="flex flex-1 flex-col items-center justify-center">
+          {/* Avatar — no pulsing rings */}
+          <div className="h-36 w-36 overflow-hidden rounded-full border-2 border-white/30 shadow-2xl">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={avatarSrc} alt="Agent" className="h-full w-full object-cover object-top" />
+          </div>
+
+          {/* Name — close to avatar */}
+          <h2 className="mt-4 text-xl font-semibold text-white">{agentName}</h2>
+
+          {/* Audio visualizer — where "Ringing..." was */}
+          {agentState && (
+            <div className="mt-3 flex h-10 w-28 items-center justify-center">
+              <AudioVisualizer agentState={agentState} audioTrack={audioTrack} />
+            </div>
+          )}
         </div>
-      </div>
-
-      {/* Agent name + status */}
-      <div className="mb-20 text-center">
-        <h2 className="text-xl font-semibold text-white">{agentName}</h2>
-        <p className="mt-1 text-sm text-white/50">Ringing...</p>
-      </div>
+      )}
     </motion.div>
   );
 }

@@ -124,12 +124,23 @@ export const PopupView = ({
     return () => clearTimeout(timeout);
   }, [agentState, sessionStarted, room, onEmbedError]);
 
+  // Overlay shows whenever no video track — ringing until agent speaks, then active call view
+  const showCallOverlay = sessionStarted && micGranted && !agentVideoTrack && !chatOpen;
+
   return (
     <div ref={ref} inert={disabled} className="flex h-full w-full flex-col overflow-hidden">
       <div className="relative flex h-full shrink-1 grow-1 flex-col">
-        {/* Ringing screen — shown until agent first speaks */}
+        {/* Call overlay — ringing until agent speaks, then active call view (hides when chat opens) */}
         <AnimatePresence>
-          {showRinging && <RingingView key="ringing" avatarSrc={avatarSrc} agentName="Hotel Receptionist" />}
+          {showCallOverlay && (
+            <RingingView
+              key="ringing"
+              avatarSrc={avatarSrc}
+              isRinging={!agentHasSpoken}
+              agentState={agentState}
+              audioTrack={agentAudioTrack}
+            />
+          )}
         </AnimatePresence>
         {/* Transcript - Only visible when chat is toggled */}
         <TranscriptMotion
