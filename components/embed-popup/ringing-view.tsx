@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import type { AgentState, TrackReference } from '@livekit/components-react';
-import { AudioVisualizer } from '@/components/embed-popup/audio-visualizer';
+import { BarVisualizer } from '@livekit/components-react';
 
 interface RingingViewProps {
   avatarSrc: string;
@@ -98,7 +98,7 @@ export function RingingView({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
-      className="dark absolute inset-0 z-10 flex flex-col items-center overflow-hidden rounded-[28px]"
+      className="absolute inset-0 z-10 flex flex-col items-center overflow-hidden rounded-[28px]"
       style={{
         background: 'linear-gradient(180deg, #1a1f3c 0%, #0f1220 50%, #0a0d1a 100%)',
       }}
@@ -161,10 +161,18 @@ export function RingingView({
           {/* Name — close to avatar */}
           <h2 className="mt-4 text-xl font-semibold text-white">{agentName}</h2>
 
-          {/* Audio visualizer — where "Ringing..." was */}
+          {/* Audio visualizer — white bars, visible on dark background */}
           {agentState && (
-            <div className="mt-3 flex h-10 w-28 items-center justify-center">
-              <AudioVisualizer agentState={agentState} audioTrack={audioTrack} />
+            <div className="mt-3 flex h-10 w-32 items-end justify-center gap-1">
+              <BarVisualizer
+                barCount={5}
+                state={agentState}
+                trackRef={audioTrack}
+                options={{ minHeight: 4 }}
+                className="flex h-full w-full items-end justify-center gap-1"
+              >
+                <span className="w-2 rounded-full bg-white/30 transition-all duration-75 data-[lk-highlighted=true]:bg-white" />
+              </BarVisualizer>
             </div>
           )}
         </div>
