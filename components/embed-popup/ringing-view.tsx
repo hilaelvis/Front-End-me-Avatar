@@ -2,15 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
-import type { AgentState, TrackReference } from '@livekit/components-react';
-import { BarVisualizer } from '@livekit/components-react';
+import type { AgentState } from '@livekit/components-react';
 
 interface RingingViewProps {
   avatarSrc: string;
   agentName?: string;
   isRinging: boolean;
   agentState?: AgentState;
-  audioTrack?: TrackReference;
 }
 
 export function RingingView({
@@ -18,7 +16,6 @@ export function RingingView({
   agentName = 'Hotel Receptionist',
   isRinging,
   agentState,
-  audioTrack,
 }: RingingViewProps) {
   const [dotCount, setDotCount] = useState(0);
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -161,18 +158,28 @@ export function RingingView({
           {/* Name — close to avatar */}
           <h2 className="mt-4 text-xl font-semibold text-white">{agentName}</h2>
 
-          {/* Audio visualizer — white bars, visible on dark background */}
+          {/* Audio bars — animate based on agent state */}
           {agentState && (
-            <div className="mt-3 flex h-10 w-32 items-end justify-center gap-1">
-              <BarVisualizer
-                barCount={5}
-                state={agentState}
-                trackRef={audioTrack}
-                options={{ minHeight: 4 }}
-                className="flex h-full w-full items-end justify-center gap-1"
-              >
-                <span className="w-2 rounded-full bg-white/30 transition-all duration-75 data-[lk-highlighted=true]:bg-white" />
-              </BarVisualizer>
+            <div className="mt-3 flex h-8 items-center justify-center gap-1.5">
+              {([0.6, 1, 0.8, 1, 0.6] as number[]).map((amp, i) => (
+                <motion.div
+                  key={i}
+                  className="w-1.5 rounded-full bg-white/50"
+                  animate={
+                    agentState === 'speaking'
+                      ? { height: [6, 6 + amp * 22, 6], backgroundColor: ['rgba(255,255,255,0.5)', 'rgba(255,255,255,1)', 'rgba(255,255,255,0.5)'] }
+                      : agentState === 'thinking'
+                      ? { height: [6, 6 + amp * 8, 6], backgroundColor: 'rgba(255,255,255,0.5)' }
+                      : { height: 6, backgroundColor: 'rgba(255,255,255,0.3)' }
+                  }
+                  transition={
+                    agentState === 'speaking' || agentState === 'thinking'
+                      ? { duration: 0.55, repeat: Infinity, delay: i * 0.08, ease: 'easeInOut' }
+                      : { duration: 0.3 }
+                  }
+                  style={{ minHeight: 6 }}
+                />
+              ))}
             </div>
           )}
         </div>

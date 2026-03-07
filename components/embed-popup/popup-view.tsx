@@ -138,7 +138,6 @@ export const PopupView = ({
               avatarSrc={avatarSrc}
               isRinging={!agentHasSpoken}
               agentState={agentState}
-              audioTrack={agentAudioTrack}
             />
           )}
         </AnimatePresence>
