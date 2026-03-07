@@ -98,7 +98,7 @@ export function RingingView({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
-      className="absolute inset-0 z-10 flex flex-col items-center overflow-hidden rounded-[28px]"
+      className="dark absolute inset-0 z-10 flex flex-col items-center overflow-hidden rounded-[28px]"
       style={{
         background: 'linear-gradient(180deg, #1a1f3c 0%, #0f1220 50%, #0a0d1a 100%)',
       }}
@@ -141,10 +141,21 @@ export function RingingView({
       ) : (
         /* ── ACTIVE CALL STATE (agent speaking, no video) ── */
         <div className="flex flex-1 flex-col items-center justify-center">
-          {/* Avatar — no pulsing rings */}
-          <div className="h-36 w-36 overflow-hidden rounded-full border-2 border-white/30 shadow-2xl">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={avatarSrc} alt="Agent" className="h-full w-full object-cover object-top" />
+          {/* Avatar with pulsing rings (kept from ringing state) */}
+          <div className="relative flex items-center justify-center">
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                className="absolute rounded-full border border-white/20"
+                animate={{ scale: [1, 1.8], opacity: [0.4, 0] }}
+                transition={{ duration: 2.5, repeat: Infinity, delay: i * 0.7, ease: 'easeOut' }}
+                style={{ width: 108, height: 108 }}
+              />
+            ))}
+            <div className="relative z-10 h-36 w-36 overflow-hidden rounded-full border-2 border-white/30 shadow-2xl">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={avatarSrc} alt="Agent" className="h-full w-full object-cover object-top" />
+            </div>
           </div>
 
           {/* Name — close to avatar */}
